@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYCAL' — Count calories with one photo.</title>
+<meta name="description" content="AI recognizes your meal, estimates calories, protein, carbs and fat in seconds. Just take a photo.">
+<meta name="theme-color" content="#0F172A">
+<meta property="og:title" content="MYCAL' — Count calories with one photo.">
+<meta property="og:description" content="AI recognizes your meal, estimates calories, protein, carbs and fat in seconds. Just take a photo.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/hero-poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230F172A'/%3E%3Cpath d='M12 4 A8 8 0 0 1 20 12' stroke='%2322C55E' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M12 4 A8 8 0 0 0 4 12' stroke='%2322C55E' stroke-width='2.4' stroke-linecap='round' opacity='0.35' fill='none'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0F172A;
+  --white:#FFFFFF;
+  --accent:#22C55E;
+  --accent-dark:#16A34A;
+  --bg:#F8FAFC;
+  --text:#111827;
+  --gray:#6B7280;
+  --gray-soft:#9CA3AF;
+  --line: rgba(15,23,42,0.08);
+  --card: #FFFFFF;
+
+  --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s6:48px; --s8:64px; --s12:96px;
+
+  --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px;
+
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 12px 32px rgba(15,23,42,0.08), 0 2px 8px rgba(15,23,42,0.04);
+  --shadow-lg: 0 24px 64px rgba(15,23,42,0.12), 0 4px 16px rgba(15,23,42,0.06);
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 260ms;
+
+  --display: 'Satoshi', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--body);
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+
+img,video{max-width:100%;display:block;}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--s4);}
+
+h1,h2,h3,h4{
+  font-family:var(--display);
+  color:var(--ink);
+  font-weight:700;
+  letter-spacing:-0.02em;
+  line-height:1.08;
+}
+
+p{color:var(--gray);line-height:1.6;}
+
+a{color:inherit;text-decoration:none;}
+
+.eyebrow{
+  font-family:var(--body);
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent-dark);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:var(--s3);
+}
+.eyebrow::before{
+  content:'';
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  display:inline-block;
+}
+
+section{position:relative;}
+
+/* Buttons */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-family:var(--body);
+  font-weight:600;
+  font-size:15px;
+  padding:14px 28px;
+  border-radius:var(--r-md);
+  cursor:pointer;
+  border:none;
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+  white-space:nowrap;
+}
+.btn-primary{
+  background:var(--accent);
+  color:#fff;
+  box-shadow:0 1px 2px rgba(34,197,94,0.1), 0 8px 20px rgba(34,197,94,0.28);
+}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-2px);box-shadow:0 4px 8px rgba(34,197,94,0.15), 0 14px 28px rgba(34,197,94,0.32);}
+.btn-primary:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
+.btn-ghost{
+  background:transparent;
+  color:var(--ink);
+  border:1px solid var(--line);
+}
+.btn-ghost:hover{background:rgba(15,23,42,0.03);transform:translateY(-2px);}
+.btn-dark{
+  background:var(--ink);
+  color:#fff;
+}
+.btn-dark:hover{background:#1E293B;transform:translateY(-2px);}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 700ms var(--ease), transform 700ms var(--ease);}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+  *{scroll-behavior:auto !important;}
+}
+
+/* ---------- HEADER ---------- */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(248,250,252,0.78);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+header.scrolled{border-bottom-color:var(--line);}
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  height:76px;
+}
+.logo{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--display);
+  font-weight:700;
+  font-size:19px;
+  color:var(--ink);
+  letter-spacing:-0.01em;
+}
+.logo-mark{
+  width:26px;height:26px;border-radius:8px;
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.logo-mark svg{width:14px;height:14px;}
+.nav-links{
+  display:flex;align-items:center;gap:var(--s6);
+  list-style:none;
+}
+.nav-links a{
+  font-size:14.5px;font-weight:500;color:var(--gray);
+  transition:color var(--dur) var(--ease);
+}
+.nav-links a:hover{color:var(--ink);}
+.nav-actions{display:flex;align-items:center;gap:var(--s3);}
+.nav-actions .btn{padding:10px 22px;font-size:14px;}
+.nav-signin{font-size:14.5px;font-weight:500;color:var(--gray);}
+.nav-signin:hover{color:var(--ink);}
+.mobile-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;}
+@media (max-width:860px){
+  .nav-links{display:none;}
+  .nav-signin{display:none;}
+}
+
+.mobile-toggle{
+  display:none;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  width:42px;
+  height:42px;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.mobile-menu{
+  position:fixed;
+  top:76px;
+  left:16px;
+  right:16px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow-md);
+  padding:16px;
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  z-index:99;
+}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{
+  color:var(--ink);
+  font-weight:600;
+  padding:10px 12px;
+  border-radius:10px;
+}
+.mobile-menu a:hover{background:#F8FAFC;}
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.62);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 220ms ease;
+  z-index:120;
+}
+.modal-backdrop.show{opacity:1;pointer-events:auto;}
+.modal-card{
+  width:min(560px, 100%);
+  background:#fff;
+  border-radius:24px;
+  box-shadow:var(--shadow-lg);
+  padding:24px;
+  position:relative;
+}
+.modal-close{
+  position:absolute;
+  top:16px;right:16px;
+  width:36px;height:36px;border:none;border-radius:50%;background:#F8FAFC;cursor:pointer;
+  font-size:20px;color:var(--ink);
+}
+.modal-screen{display:none;}
+.modal-screen.active{display:block;}
+.modal-screen h3{font-size:28px;margin-bottom:8px;}
+.modal-screen p{margin-bottom:18px;}
+.form-grid{display:grid;gap:14px;}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.field input{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14px;
+}
+.field input:focus{outline:2px solid rgba(34,197,94,0.25);border-color:var(--accent);}
+.modal-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+.modal-note{font-size:12px;color:var(--gray-soft);margin-top:8px;}
+.scan-preview{
+  display:none;
+  margin-top:6px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#F8FAFC;
+}
+.scan-preview img{width:100%;max-height:260px;object-fit:cover;}
+.scan-preview.show{display:block;}
+.scan-result{
+  margin-top:16px;
+  padding:14px;
+  border-radius:14px;
+  background:#F0FDF4;
+  color:var(--ink);
+  display:none;
+}
+.scan-result.show{display:block;}
+.scan-result.loading{background:#F8FAFC;color:var(--gray);}
+.capture-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.capture-actions .btn{flex:1;min-width:140px;padding:12px 16px;font-size:13.5px;}
+.camera-view{
+  display:none;
+  margin-top:6px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#0b0f16;
+  position:relative;
+}
+.camera-view.show{display:block;}
+.camera-view video{width:100%;max-height:320px;object-fit:cover;display:block;background:#000;}
+.camera-actions{
+  display:flex;gap:10px;padding:10px;
+  background:rgba(15,23,42,0.85);
+}
+.camera-actions .btn{flex:1;padding:10px 14px;font-size:13.5px;}
+.camera-actions .btn-ghost{background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.2);}
+.spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(15,23,42,0.15);border-top-color:var(--accent-dark);
+  display:inline-block;vertical-align:middle;margin-right:8px;
+  animation:spin 700ms linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-history{
+  margin-top:14px;
+  display:grid;gap:10px;
+}
+.scan-history-item{
+  background:#F8FAFC;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+}
+.scan-history-item strong{display:block;margin-bottom:4px;}
+.toast{
+  position:fixed;right:18px;bottom:18px;z-index:140;
+  background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow-md);
+  transform:translateY(14px);opacity:0;pointer-events:none;transition:all 220ms ease;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+@media (max-width:860px){
+  .mobile-toggle{display:inline-flex;}
+}
+
+/* ---------- HERO ---------- */
+.hero{
+  padding:var(--s12) 0 var(--s8);
+  position:relative;
+  overflow:hidden;
+}
+.hero-glow{
+  position:absolute;
+  top:-200px;left:50%;
+  width:1100px;height:900px;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at center, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.05) 40%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+.hero-inner{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+}
+.hero h1{
+  font-size:clamp(40px, 6vw, 76px);
+  max-width:900px;
+  margin-bottom:var(--s3);
+}
+.hero h1 .accent-word{color:var(--accent);}
+.hero-sub{
+  font-size:19px;
+  max-width:560px;
+  margin-bottom:var(--s4);
+  color:var(--gray);
+}
+.hero-cta-row{
+  display:flex;align-items:center;gap:var(--s3);
+  margin-bottom:var(--s2);
+}
+.hero-cta-row .btn{padding:16px 34px;font-size:16px;}
+.hero-note{
+  font-size:13px;color:var(--gray-soft);
+  margin-bottom:var(--s8);
+}
+
+/* Phone mockup */
+.phone-stage{
+  position:relative;
+  width:100%;
+  display:flex;justify-content:center;
+  perspective:1600px;
+}
+.phone{
+  position:relative;
+  width:300px;
+  aspect-ratio:300/612;
+  border-radius:44px;
+  background:#0b0f16;
+  padding:11px;
+  box-shadow:
+    0 40px 80px -20px rgba(15,23,42,0.35),
+    0 12px 24px -8px rgba(15,23,42,0.18),
+    inset 0 0 0 1.5px rgba(255,255,255,0.06);
+  transform:rotateX(2deg);
+  animation:floaty 6s ease-in-out infinite;
+}
+@keyframes floaty{
+  0%,100%{transform:rotateX(2deg) translateY(0);}
+  50%{transform:rotateX(2deg) translateY(-12px);}
+}
+.phone-screen{
+  position:relative;
+  width:100%;height:100%;
+  border-radius:34px;
+  overflow:hidden;
+  background:#000;
+}
+.phone-screen video{
+  width:100%;height:100%;
+  object-fit:cover;
+}
+.phone-notch{
+  position:absolute;
+  top:11px;left:50%;transform:translateX(-50%);
+  width:90px;height:24px;
+  background:#0b0f16;
+  border-radius:14px;
+  z-index:5;
+}
+@media (max-width:600px){
+  .hero{padding:var(--s8) 0 var(--s6);}
+  .hero-cta-row{flex-direction:column;width:100%;padding:0 var(--s4);}
+  .hero-cta-row .btn{width:100%;}
+  .phone{width:240px;}
+}
+
+/* ---------- SECTION HEADINGS (shared) ---------- */
+.section-head{
+  max-width:640px;
+  margin:0 auto var(--s8);
+  text-align:center;
+}
+.section-head h2{font-size:clamp(30px, 4vw, 44px);margin-bottom:var(--s2);}
+.section-head p{font-size:17px;}
+
+/* ---------- PROBLEM ---------- */
+.problem{padding:var(--s12) 0;}
+.problem-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:var(--s4);
+  max-width:1000px;margin:0 auto;
+}
+.problem-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:var(--s4);
+  text-align:left;
+}
+.problem-icon{
+  width:44px;height:44px;
+  border-radius:12px;
+  background:#FEF2F2;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:var(--s3);
+  font-size:20px;
+}
+.problem-card h3{font-size:17px;margin-bottom:6px;}
+.problem-card p{font-size:14.5px;}
+@media (max-width:800px){
+  .problem-grid{grid-template-columns:1fr;}
+}
+
+/* ---------- SOLUTION PIPELINE ---------- */
+.solution{padding:var(--s12) 0;background:var(--ink);border-radius:var(--r-xl);margin:0 var(--s4);}
+.solution .wrap{max-width:1100px;}
+.solution .section-head h2{color:#fff;}
+.solution .section-head p{color:rgba(255,255,255,0.55);}
+.pipeline{
+  display:flex;align-items:center;justify-content:center;
+  gap:var(--s4);
+  flex-wrap:wrap;
+}
+.pipe-item{
+  display:flex;flex-direction:column;align-items:center;
+  gap:var(--s3);
+  width:220px;
+}
+.pipe-visual{
+  width:180px;height:180px;
+  border-radius:var(--r-lg);
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+.pipe-visual img{width:100%;height:100%;object-fit:cover;}
+.pipe-visual.result{
+  background:rgba(255,255,255,0.06);
+  flex-direction:column;
+  padding:var(--s3);
+  gap:10px;
+}
+.ring{
+  width:56px;height:56px;border-radius:50%;
+  background:conic-gradient(var(--accent) 0deg 250deg, rgba(255,255,255,0.12) 250deg 360deg);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:4px;
+}
+.ring::after{
+  content:'';width:38px;height:38px;border-radius:50%;background:var(--ink);
+}
+.pipe-bar{width:100%;height:6px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;}
+.pipe-bar span{display:block;height:100%;background:var(--accent);border-radius:4px;}
+.pipe-icon{
+  width:180px;height:180px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+}
+.pipe-label{
+  font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);
+}
+.pipe-arrow{color:rgba(255,255,255,0.25);font-size:22px;}
+@media (max-width:760px){
+  .pipe-arrow{transform:rotate(90deg);}
+}
+
+/* ---------- NUTRITION CARDS ---------- */
+.nutri{padding:var(--s12) 0;}
+.nutri-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:var(--s3);
+  max-width:1000px;margin:0 auto;
+}
+.nutri-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+  padding:var(--s3);
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.nutri-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.nutri-card .dot{width:10px;height:10px;border-radius:50%;margin-bottom:12px;}
+.nutri-card h4{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.nutri-card .val{font-size:13px;color:var(--gray-soft);}
+@media (max-width:760px){
+  .nutri-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ---------- HOW IT WORKS ---------- */
+.how{padding:var(--s12) 0;}
+.how-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:var(--s6);
+  max-width:1000px;margin:0 auto;
+  position:relative;
+}
+.how-row::before{
+  content:'';
+  position:absolute;top:34px;left:16%;right:16%;
+  height:1px;
+  background:repeating-linear-gradient(to right, var(--line) 0 8px, transparent 8px 16px);
+}
+.how-step{text-align:center;position:relative;}
+.how-num{
+  width:68px;height:68px;border-radius:50%;
+  background:var(--white);
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  margin:0 auto var(--s3);
+  position:relative;z-index:1;
+  box-shadow:var(--shadow-sm);
+}
+.how-step h3{font-size:18px;margin-bottom:6px;}
+.how-step p{font-size:14.5px;max-width:220px;margin:0 auto;}
+@media (max-width:760px){
+  .how-row{grid-template-columns:1fr;gap:var(--s6);}
+  .how-row::before{display:none;}
+}
+
+/* ---------- FEATURES ---------- */
+.features{padding:var(--s12) 0;}
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:var(--s3);
+}
+.feat-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:var(--s4);
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.feat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:transparent;}
+.feat-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:#F0FDF4;
+  color:var(--accent-dark);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:var(--s3);
+}
+.feat-card h3{font-size:16.5px;margin-bottom:6px;}
+.feat-card p{font-size:14.5px;}
+@media (max-width:900px){
+  .feat-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:600px){
+  .feat-grid{grid-template-columns:1fr;}
+}
+
+/* ---------- COMPARISON ---------- */
+.compare{padding:var(--s12) 0;}
+.compare-table{
+  max-width:760px;margin:0 auto;
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:var(--card);
+}
+.compare-row{
+  display:grid;grid-template-columns:1fr 1fr;
+}
+.compare-row + .compare-row{border-top:1px solid var(--line);}
+.compare-row.head{background:var(--ink);}
+.compare-row.head div{color:#fff;font-weight:700;font-family:var(--display);font-size:15px;}
+.compare-cell{
+  padding:18px 24px;
+  font-size:14.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.compare-cell.old{color:var(--gray-soft);}
+.compare-cell.new{color:var(--ink);font-weight:600;background:#F0FDF4;}
+.compare-cell.new svg{color:var(--accent);flex-shrink:0;}
+@media (max-width:600px){
+  .compare-cell{padding:14px 16px;font-size:13.5px;}
+}
+
+/* ---------- TESTIMONIAL ---------- */
+.testi{padding:var(--s10, 80px) 0;text-align:center;}
+.stars{color:var(--accent);font-size:22px;letter-spacing:4px;margin-bottom:var(--s3);}
+.testi blockquote{
+  font-family:var(--display);
+  font-size:clamp(24px,3vw,34px);
+  font-weight:700;
+  color:var(--ink);
+  max-width:720px;margin:0 auto var(--s3);
+  letter-spacing:-0.01em;
+  line-height:1.3;
+}
+.testi cite{font-size:14px;color:var(--gray);font-style:normal;}
+
+/* ---------- PRICING ---------- */
+.pricing{padding:var(--s12) 0;}
+.price-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:var(--s4);
+  max-width:800px;margin:0 auto;
+}
+.price-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r-xl);
+  padding:var(--s6) var(--s4);
+  position:relative;
+}
+.price-card.pro{
+  background:var(--ink);
+  border-color:var(--ink);
+}
+.price-badge{
+  position:absolute;top:-13px;right:28px;
+  background:var(--accent);color:#fff;
+  font-size:12px;font-weight:700;
+  padding:5px 14px;border-radius:20px;
+  letter-spacing:0.02em;
+}
+.price-card h3{font-size:16px;color:var(--gray);font-weight:600;margin-bottom:var(--s2);}
+.price-card.pro h3{color:rgba(255,255,255,0.6);}
+.price-amount{
+  font-family:var(--display);font-size:44px;font-weight:700;color:var(--ink);
+  margin-bottom:var(--s4);
+}
+.price-card.pro .price-amount{color:#fff;}
+.price-amount span{font-size:15px;color:var(--gray-soft);font-weight:500;}
+.price-list{list-style:none;margin-bottom:var(--s4);}
+.price-list li{
+  display:flex;align-items:center;gap:10px;
+  font-size:14.5px;color:var(--gray);
+  padding:8px 0;
+}
+.price-card.pro .price-list li{color:rgba(255,255,255,0.75);}
+.price-list svg{color:var(--accent);flex-shrink:0;}
+.price-card .btn{width:100%;}
+
+/* ---------- FAQ ---------- */
+.faq{padding:var(--s12) 0;}
+.faq-list{max-width:720px;margin:0 auto;}
+.faq-item{
+  border-bottom:1px solid var(--line);
+}
+.faq-q{
+  width:100%;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s3);
+  padding:var(--s4) 4px;
+  background:none;border:none;cursor:pointer;
+  text-align:left;
+  font-family:var(--display);
+  font-size:17px;font-weight:700;color:var(--ink);
+}
+.faq-q .plus{
+  flex-shrink:0;
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  border:1px solid var(--line);
+  position:relative;
+  transition:transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.faq-q .plus::before, .faq-q .plus::after{
+  content:'';position:absolute;background:var(--ink);
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.faq-q .plus::before{width:10px;height:1.4px;}
+.faq-q .plus::after{width:1.4px;height:10px;}
+.faq-item.open .faq-q .plus{background:var(--ink);}
+.faq-item.open .faq-q .plus::before, .faq-item.open .faq-q .plus::after{background:#fff;}
+.faq-item.open .faq-q .plus::after{transform:rotate(90deg) scaleY(0);opacity:0;}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height 320ms var(--ease);
+}
+.faq-a p{padding:0 4px var(--s4);font-size:14.5px;max-width:600px;}
+.faq-item.open .faq-a{max-height:200px;}
+
+/* ---------- FINAL CTA ---------- */
+.final-cta{
+  padding:var(--s12) 0;
+  text-align:center;
+}
+.final-cta-inner{
+  background:var(--ink);
+  border-radius:var(--r-xl);
+  padding:var(--s8) var(--s4);
+  position:relative;
+  overflow:hidden;
+}
+.final-cta-glow{
+  position:absolute;
+  bottom:-140px;left:50%;transform:translateX(-50%);
+  width:700px;height:400px;
+  background:radial-gradient(ellipse at center, rgba(34,197,94,0.28), transparent 70%);
+  pointer-events:none;
+}
+.final-cta h2{
+  color:#fff;
+  font-size:clamp(32px,5vw,52px);
+  margin-bottom:var(--s2);
+  position:relative;z-index:1;
+}
+.final-cta p{
+  color:rgba(255,255,255,0.55);
+  font-size:17px;margin-bottom:var(--s4);
+  position:relative;z-index:1;
+}
+.final-cta .btn{position:relative;z-index:1;padding:16px 36px;font-size:16px;}
+
+/* ---------- FOOTER ---------- */
+footer{padding:var(--s8) 0 var(--s6);}
+.footer-top{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-wrap:wrap;gap:var(--s6);
+  padding-bottom:var(--s6);
+  border-bottom:1px solid var(--line);
+  margin-bottom:var(--s4);
+}
+.footer-brand .logo{margin-bottom:var(--s2);}
+.footer-brand p{font-size:14px;max-width:260px;}
+.footer-cols{display:flex;gap:var(--s8);flex-wrap:wrap;}
+.footer-col h4{font-size:13px;color:var(--ink);margin-bottom:var(--s3);font-family:var(--body);}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-col a{font-size:14px;color:var(--gray);transition:color var(--dur) var(--ease);}
+.footer-col a:hover{color:var(--ink);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s2);
+}
+.footer-bottom p{font-size:13px;color:var(--gray-soft);}
+.footer-legal{display:flex;gap:var(--s4);}
+.footer-legal a{font-size:13px;color:var(--gray-soft);}
+.footer-legal a:hover{color:var(--gray);}
+
+@media (max-width:700px){
+  .footer-top{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<header id="header">
+  <div class="wrap nav">
+    <a href="#" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 A9 9 0 0 1 21 12" stroke="#22C55E" stroke-width="2.6" stroke-linecap="round"/><path d="M12 3 A9 9 0 0 0 3 12" stroke="#22C55E" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/></svg>
+      </span>
+      MYCAL'
+    </a>
+    <button class="mobile-toggle" id="mobileToggle" type="button" aria-label="Abrir menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#signin" class="nav-signin" data-open-modal="signin">Sign in</a>
+      <a href="#start-free" class="btn btn-primary" data-open-modal="signup">Start Free</a>
+    </div>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features">Features</a>
+  <a href="#how">How it works</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#faq">FAQ</a>
+  <a href="#signin" data-open-modal="signin">Sign in</a>
+  <a href="#start-free" class="btn btn-primary" data-open-modal="signup">Start Free</a>
+</div>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow reveal">AI Nutrition Assistant</div>
+    <h1 class="reveal">Count calories with <span class="accent-word">one photo.</span></h1>
+    <p class="hero-sub reveal">AI recognizes your meal, estimates calories, protein, carbs and fat in seconds.</p>
+    <div class="hero-cta-row reveal">
+      <a href="#start-free" class="btn btn-primary" data-open-modal="signup">Start Free</a>
+      <a href="#how" class="btn btn-ghost">See how it works</a>
+    </div>
+    <p class="hero-note reveal">No credit card. 10 free scans every day.</p>
+
+    <div class="phone-stage reveal">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
+            <source src="assets/hero-demo.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">The old way</div>
+      <h2>Tracking food shouldn't feel like homework.</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">📖</div>
+        <h3>Logging meals is boring.</h3>
+        <p>Every bite becomes data entry. Most apps turn eating into a spreadsheet.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">⌨️</div>
+        <h3>Searching foods takes forever.</h3>
+        <p>Scrolling through databases for "grilled chicken bowl, homemade" isn't food tracking.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">❌</div>
+        <h3>Most people quit after a week.</h3>
+        <p>Friction kills habits. If it's not effortless, it doesn't last.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">The MYCAL' way</div>
+      <h2>One photo. Everything you need.</h2>
+      <p>Eat normally. Snap a photo. Understand your nutrition.</p>
+    </div>
+    <div class="pipeline">
+      <div class="pipe-item reveal">
+        <div class="pipe-visual">
+          <img src="assets/hero-poster.jpg" alt="Photo of a meal" style="object-position:20% 30%; width:140%; height:140%;">
+        </div>
+        <div class="pipe-label">Photo</div>
+      </div>
+      <div class="pipe-arrow reveal">→</div>
+      <div class="pipe-item reveal">
+        <div class="pipe-visual pipe-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none"><path d="M12 3 A9 9 0 0 1 21 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3 A9 9 0 0 0 3 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.4"/><path d="M12 21 A9 9 0 0 1 3 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/></svg>
+        </div>
+        <div class="pipe-label">AI</div>
+      </div>
+      <div class="pipe-arrow reveal">→</div>
+      <div class="pipe-item reveal">
+        <div class="pipe-visual result">
+          <div class="ring"></div>
+          <div class="pipe-bar"><span style="width:70%"></span></div>
+          <div class="pipe-bar"><span style="width:45%;background:#F59E0B"></span></div>
+          <div class="pipe-bar"><span style="width:85%"></span></div>
+        </div>
+        <div class="pipe-label">Result</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NUTRITION CARDS -->
+<section class="nutri">
+  <div class="wrap">
+    <div class="nutri-grid">
+      <div class="nutri-card reveal"><div class="dot" style="background:#22C55E"></div><h4>Calories</h4><div class="val">per meal, instantly</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#3B82F6"></div><h4>Protein</h4><div class="val">grams, estimated</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#F59E0B"></div><h4>Carbs</h4><div class="val">grams, estimated</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#EF4444"></div><h4>Fat</h4><div class="val">grams, estimated</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#8B5CF6"></div><h4>Fiber</h4><div class="val">grams, estimated</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#EC4899"></div><h4>Sugar</h4><div class="val">grams, estimated</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#14B8A6"></div><h4>Confidence Score</h4><div class="val">how sure the AI is</div></div>
+      <div class="nutri-card reveal"><div class="dot" style="background:#0F172A"></div><h4>Editable</h4><div class="val">fine-tune any value</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">Simplicity</div>
+      <h2>Three steps. A few seconds.</h2>
+    </div>
+    <div class="how-row">
+      <div class="how-step reveal">
+        <div class="how-num">📸</div>
+        <h3>Take a photo</h3>
+        <p>Point your camera at your plate. That's the whole step.</p>
+      </div>
+      <div class="how-step reveal">
+        <div class="how-num">🤖</div>
+        <h3>AI identifies your food</h3>
+        <p>MYCAL' recognizes ingredients and estimates portion size automatically.</p>
+      </div>
+      <div class="how-step reveal">
+        <div class="how-num">📊</div>
+        <h3>See nutrition instantly</h3>
+        <p>Calories and macros appear in seconds, ready to review or adjust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">Features</div>
+      <h2>Built to disappear into your day.</h2>
+      <p>Every feature exists to remove a step, never to add one.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>AI Recognition</h3>
+        <p>Recognizes thousands of foods, from homemade meals to takeout.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16"/></svg></div>
+        <h3>Portion Estimation</h3>
+        <p>Estimates serving size automatically, no measuring cups required.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 5-8"/></svg></div>
+        <h3>Nutrition Breakdown</h3>
+        <p>Calories, protein, fat and carbs, broken down clearly every time.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg></div>
+        <h3>History</h3>
+        <p>Every meal saved automatically. Look back without lifting a finger.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Daily Goals</h3>
+        <p>Stay on track effortlessly, with targets that adapt to you.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 6h7v7"/></svg></div>
+        <h3>Insights</h3>
+        <p>Weekly eating habits, powered by AI, delivered in plain language.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="compare">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">Comparison</div>
+      <h2>Why start over?</h2>
+    </div>
+    <div class="compare-table reveal">
+      <div class="compare-row head">
+        <div class="compare-cell">Traditional</div>
+        <div class="compare-cell">MYCAL'</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell old">Search foods</div>
+        <div class="compare-cell new"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Photo</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell old">Manual portions</div>
+        <div class="compare-cell new"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> AI</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell old">Takes minutes</div>
+        <div class="compare-cell new"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Seconds</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell old">Tedious</div>
+        <div class="compare-cell new"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Simple</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testi">
+  <div class="wrap">
+    <div class="stars reveal">★★★★★</div>
+    <blockquote class="reveal">"Finally a calorie app I actually use."</blockquote>
+    <cite class="reveal">— Early access user</cite>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">Pricing</div>
+      <h2>Start free. Upgrade if you want more.</h2>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <h3>Free</h3>
+        <div class="price-amount">$0<span>/month</span></div>
+        <ul class="price-list">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> 10 scans / day</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Basic nutrition breakdown</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> 7-day history</li>
+        </ul>
+        <a href="#start-free" class="btn btn-ghost" data-open-modal="signup">Start Free</a>
+      </div>
+      <div class="price-card pro reveal">
+        <div class="price-badge">Most popular</div>
+        <h3>Pro</h3>
+        <div class="price-amount" style="color:#fff">$9<span style="color:rgba(255,255,255,0.5)">/month</span></div>
+        <ul class="price-list">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Unlimited scans</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> AI insights</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Full meal history</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Macro tracking</li>
+        </ul>
+        <a href="#start-free" class="btn btn-primary" data-open-modal="signup">Start Free</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow" style="justify-content:center">FAQ</div>
+      <h2>Questions, answered.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item open">
+        <button class="faq-q"><span>How accurate is it?</span><span class="plus"></span></button>
+        <div class="faq-a"><p>MYCAL' is built to estimate, not to be a lab scale. Accuracy improves the more you use it, and every result can be adjusted by hand.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Can it recognize homemade meals?</span><span class="plus"></span></button>
+        <div class="faq-a"><p>Yes. The model is trained on home cooking as much as restaurant food, and it gets better at recognizing your own dishes over time.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Does it work offline?</span><span class="plus"></span></button>
+        <div class="faq-a"><p>Photos can be captured offline and are analyzed as soon as you're back online. Your history stays on the device either way.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Can I edit results?</span><span class="plus"></span></button>
+        <div class="faq-a"><p>Always. Tap any value, calories, protein, portion size, and correct it in a couple of seconds.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="wrap">
+    <div class="final-cta-inner reveal">
+      <div class="final-cta-glow"></div>
+      <h2>Eat first.<br>We'll do the math.</h2>
+      <p>Start Free — no credit card required.</p>
+      <a href="#start-free" class="btn btn-primary" data-open-modal="signup">Start Free</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 A9 9 0 0 1 21 12" stroke="#22C55E" stroke-width="2.6" stroke-linecap="round"/><path d="M12 3 A9 9 0 0 0 3 12" stroke="#22C55E" stroke-width="2.6" stroke-linecap="round" opacity="0.35"/></svg>
+          </span>
+          MYCAL'
+        </a>
+        <p>Eat smarter without thinking harder.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 MYCAL'. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" type="button" aria-label="Fechar">×</button>
+
+    <div class="modal-screen active" id="signupScreen">
+      <div class="eyebrow" style="justify-content:flex-start">Start free</div>
+      <h3 id="modalTitle">Crie sua conta e escaneie sua primeira refeição</h3>
+      <p>Preencha seu nome e e-mail. Em seguida, envie uma foto para simular a análise do prato.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="userName">Nome</label>
+          <input id="userName" type="text" placeholder="Seu nome">
+        </div>
+        <div class="field">
+          <label for="userEmail">E-mail</label>
+          <input id="userEmail" type="email" placeholder="voce@exemplo.com">
+        </div>
+        <div class="field">
+          <label id="mealPhotoLabel" for="mealPhoto">Foto do prato</label>
+          <div class="capture-actions">
+            <button class="btn btn-ghost" id="openCameraBtn" type="button">📷 Tirar foto</button>
+            <label class="btn btn-ghost" for="mealPhoto" style="cursor:pointer;margin:0;">🖼️ Enviar imagem</label>
+          </div>
+          <input id="mealPhoto" type="file" accept="image/*" capture="environment" hidden>
+        </div>
+        <div class="camera-view" id="cameraView" aria-hidden="true">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="camera-actions">
+            <button class="btn btn-primary" id="captureBtn" type="button">Capturar</button>
+            <button class="btn btn-ghost" id="cancelCameraBtn" type="button">Cancelar</button>
+          </div>
+        </div>
+        <canvas id="captureCanvas" hidden></canvas>
+        <div class="scan-preview" id="scanPreview"></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="scanMealBtn" type="button">Analisar refeição</button>
+          <button class="btn btn-ghost" id="switchToSignin" type="button">Já tenho conta</button>
+        </div>
+        <div class="scan-result" id="scanResult"></div>
+        <div class="scan-history" id="scanHistory"></div>
+        <p class="modal-note">A análise é feita por IA a partir da imagem enviada. O histórico fica salvo apenas neste navegador.</p>
+      </div>
+    </div>
+
+    <div class="modal-screen" id="signinScreen">
+      <div class="eyebrow" style="justify-content:flex-start">Sign in</div>
+      <h3>Entre na sua conta</h3>
+      <p>Use o mesmo e-mail salvo na demo para continuar.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="signinEmail">E-mail</label>
+          <input id="signinEmail" type="email" placeholder="voce@exemplo.com">
+        </div>
+        <div class="field">
+          <label for="signinPassword">Senha</label>
+          <input id="signinPassword" type="password" placeholder="••••••••">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="signinBtn" type="button">Entrar</button>
+          <button class="btn btn-ghost" id="switchToSignup" type="button">Criar conta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script>
+const header = document.getElementById('header');
+const mobileToggle = document.getElementById('mobileToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalClose = document.getElementById('modalClose');
+const signupScreen = document.getElementById('signupScreen');
+const signinScreen = document.getElementById('signinScreen');
+const switchToSignin = document.getElementById('switchToSignin');
+const switchToSignup = document.getElementById('switchToSignup');
+const userName = document.getElementById('userName');
+const userEmail = document.getElementById('userEmail');
+const signinEmail = document.getElementById('signinEmail');
+const signinPassword = document.getElementById('signinPassword');
+const mealPhoto = document.getElementById('mealPhoto');
+const scanPreview = document.getElementById('scanPreview');
+const scanResult = document.getElementById('scanResult');
+const scanHistory = document.getElementById('scanHistory');
+const toast = document.getElementById('toast');
+const navSignin = document.querySelector('.nav-signin');
+const openCameraBtn = document.getElementById('openCameraBtn');
+const cameraView = document.getElementById('cameraView');
+const cameraVideo = document.getElementById('cameraVideo');
+const captureBtn = document.getElementById('captureBtn');
+const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+const captureCanvas = document.getElementById('captureCanvas');
+const scanMealBtn = document.getElementById('scanMealBtn');
+
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB (upload bruto)
+const MAX_SEND_BYTES = 2.5 * 1024 * 1024; // 2.5MB (limite de envio à IA)
+const MAX_IMAGE_DIM = 1280; // maior lado em px após compressão
+const JPEG_QUALITY = 0.82;
+let currentPhotoDataUrl = null;
+let cameraStream = null;
+let isAnalyzing = false;
+
+/**
+ * Comprime/redimensiona uma imagem (dataURL) para reduzir o payload
+ * enviado ao Puter, evitando rejeição e timeouts. Faz bypass se já
+ * estiver pequena o suficiente.
+ */
+function compressImage(dataUrl, targetBytes = MAX_SEND_BYTES) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+
+      // Redimensiona para caber no limite de dimensão
+      if (w > MAX_IMAGE_DIM || h > MAX_IMAGE_DIM) {
+        const scale = MAX_IMAGE_DIM / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+
+const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      // Tenta qualidades decrescentes até caber no limite de bytes
+      let quality = JPEG_QUALITY;
+      let out = canvas.toDataURL('image/jpeg', quality);
+      while (out.length > targetBytes * 1.37 && quality > 0.4) {
+        quality -= 0.12;
+        out = canvas.toDataURL('image/jpeg', quality);
+      }
+      resolve(out);
+    };
+    img.onerror = () => resolve(dataUrl); // mantém original se falhar
+    img.src = dataUrl;
+  });
+}
+
+let demoState = {
+  user: safeParse(localStorage.getItem('mycal_user'), null),
+  history: safeParse(localStorage.getItem('mycal_history'), [])
+};
+
+function safeParse(raw, fallback) {
+  try {
+    const value = JSON.parse(raw);
+    return value === null || value === undefined ? fallback : value;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showToast(text) {
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => toast.classList.remove('show'), 2400);
+}
+
+function openModal(mode = 'signup') {
+  clearAnalysisState();
+  modalBackdrop.classList.add('show');
+  modalBackdrop.setAttribute('aria-hidden', 'false');
+  if (mode === 'signin') {
+    signupScreen.classList.remove('active');
+    signinScreen.classList.add('active');
+  } else {
+    signinScreen.classList.remove('active');
+    signupScreen.classList.add('active');
+  }
+}
+
+function closeModal() {
+  modalBackdrop.classList.remove('show');
+  modalBackdrop.setAttribute('aria-hidden', 'true');
+  stopCamera();
+}
+
+function saveUser(name, email) {
+  demoState.user = { name, email };
+  localStorage.setItem('mycal_user', JSON.stringify(demoState.user));
+  navSignin.textContent = name || 'Sign in';
+  if (name) {
+    navSignin.setAttribute('title', `Conta de ${name}`);
+  }
+}
+
+function renderHistory() {
+  scanHistory.innerHTML = '';
+  if (!demoState.history.length) {
+    const empty = document.createElement('div');
+    empty.className = 'scan-history-item';
+    empty.innerHTML = '<strong>Nenhuma refeição salva ainda</strong><span>Tire ou envie uma foto do prato para registrar sua primeira análise.</span>';
+    scanHistory.appendChild(empty);
+    return;
+  }
+
+  demoState.history.slice().reverse().slice(0, 10).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'scan-history-item';
+    const meal = escapeHtml(item.meal);
+    const calories = Number(item.calories) || 0;
+    const protein = Number(item.protein) || 0;
+    const carbs = Number(item.carbs) || 0;
+    const fat = Number(item.fat) || 0;
+    row.innerHTML = `<strong>${meal}</strong><span>${calories} kcal · ${protein}g proteína · ${carbs}g carb · ${fat}g gordura</span>`;
+    scanHistory.appendChild(row);
+  });
+}
+
+/* ---------- CAMERA CAPTURE ---------- */
+async function openCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast('Seu navegador não suporta captura de câmera. Use "Enviar imagem".');
+    return;
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+      audio: false
+    });
+    cameraVideo.srcObject = cameraStream;
+    cameraView.classList.add('show');
+    cameraView.setAttribute('aria-hidden', 'false');
+  } catch (err) {
+    showToast('Não foi possível acessar a câmera. Verifique as permissões ou use "Enviar imagem".');
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  cameraVideo.srcObject = null;
+  cameraView.classList.remove('show');
+  cameraView.setAttribute('aria-hidden', 'true');
+}
+
+function capturePhoto() {
+  if (!cameraVideo.videoWidth) {
+    showToast('Aguarde a câmera carregar e tente novamente.');
+    return;
+  }
+  captureCanvas.width = cameraVideo.videoWidth;
+  captureCanvas.height = cameraVideo.videoHeight;
+  const ctx = captureCanvas.getContext('2d');
+  ctx.drawImage(cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+  currentPhotoDataUrl = captureCanvas.toDataURL('image/jpeg', 0.9);
+  clearAnalysisState();
+  setPreview(currentPhotoDataUrl);
+  stopCamera();
+}
+
+/* ---------- UPLOAD / PREVIEW ---------- */
+function setPreview(dataUrl) {
+  scanPreview.innerHTML = '';
+  if (!dataUrl) {
+    scanPreview.classList.remove('show');
+    return;
+  }
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.alt = 'Preview da refeição';
+  scanPreview.appendChild(img);
+  scanPreview.classList.add('show');
+}
+
+function clearAnalysisState() {
+  scanResult.classList.remove('show', 'loading');
+  scanResult.innerHTML = '';
+}
+
+function updatePreview() {
+  const file = mealPhoto.files && mealPhoto.files[0];
+  if (!file) return;
+
+  clearAnalysisState(); // remove resultado/análise antiga ao escolher nova foto
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Envie um arquivo de imagem válido (JPG, PNG, WebP).');
+    mealPhoto.value = '';
+    return;
+  }
+  if (file.size > MAX_PHOTO_BYTES) {
+    showToast('Imagem muito grande. Envie um arquivo de até 8MB.');
+    mealPhoto.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentPhotoDataUrl = reader.result;
+    setPreview(currentPhotoDataUrl);
+  };
+  reader.onerror = () => showToast('Não foi possível ler a imagem. Tente novamente.');
+  reader.readAsDataURL(file);
+}
+
+/* ---------- AI ANALYSIS ---------- */
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+  ]);
+}
+
+/*
+ * Extrai o objeto JSON de uma resposta da IA. Lida com:
+ *  - conteúdo multi-partes (arrays de {type, text})
+ *  - texto explicativo ao redor do JSON
+ *  - markdown ```json ```
+ */
+function extractJson(raw) {
+  // Converte possível resposta estruturada/array em texto
+  let text = raw;
+  if (Array.isArray(raw)) {
+    text = raw.map(part => {
+      if (part && typeof part === 'object') return part.text || part.content || '';
+      return String(part);
+    }).join('\n');
+  } else if (raw && typeof raw === 'object') {
+    text = raw.message?.content || raw.text || raw.content || JSON.stringify(raw);
+  }
+  text = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
+
+  // Encontra o primeiro bloco { ... } balanceado
+  const start = text.indexOf('{');
+  if (start === -1) throw new SyntaxError('JSON não encontrado');
+  let depth = 0, inStr = false, escape = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inStr) {
+      if (escape) escape = false;
+      else if (ch === '\\') escape = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        const jsonStr = text.slice(start, i + 1);
+        return JSON.parse(jsonStr);
+      }
+    }
+  }
+  throw new SyntaxError('JSON incompleto');
+}
+
+async function analyzeMeal() {
+  if (isAnalyzing) return;
+
+  const name = (userName.value || demoState.user?.name || '').trim();
+  const email = (userEmail.value || demoState.user?.email || '').trim();
+
+  if (!name || !email) {
+    showToast('Preencha nome e e-mail para continuar.');
+    return;
+  }
+  if (!currentPhotoDataUrl) {
+    showToast('Tire ou envie uma foto do prato para analisar.');
+    return;
+  }
+  if (typeof puter === 'undefined' || !puter.ai || !puter.ai.chat) {
+    showToast('Serviço de IA indisponível no momento. Tente novamente em instantes.');
+    return;
+  }
+
+saveUser(name, email);
+
+  isAnalyzing = true;
+  scanMealBtn.disabled = true;
+  scanResult.classList.add('show', 'loading');
+  scanResult.innerHTML = '<span class="spinner"></span>Preparando a foto…';
+
+  const prompt = 'Você é um nutricionista especialista em análise visual de alimentos. ' +
+    'Observe a foto do prato e estime os valores nutricionais totais da refeição. ' +
+    'Responda ESTRITAMENTE em JSON válido, sem markdown e sem texto adicional, neste formato exato: ' +
+    '{"meal":"nome curto do prato em português","calories":numero,"protein":numero,"carbs":numero,"fat":numero,"fiber":numero,"sugar":numero,"confidence":numero de 0 a 100}. ' +
+    'Todos os valores numéricos devem ser números inteiros, sem unidades e sem texto.';
+
+  try {
+    // Comprime a foto para reduzir payload e evitar timeout na IA
+    scanResult.innerHTML = '<span class="spinner"></span>Otimizando a imagem…';
+    const optimized = await compressImage(currentPhotoDataUrl);
+
+    scanResult.innerHTML = '<span class="spinner"></span>Analisando a foto do prato…';
+    const response = await withTimeout(puter.ai.chat(prompt, optimized), 30000);
+    const rawText = typeof response === 'string'
+      ? response
+      : (response?.message?.content ?? response?.text ?? response);
+
+    const data = extractJson(rawText);
+
+    const result = {
+      meal: (data.meal ? String(data.meal) : 'Refeição analisada').slice(0, 80),
+      calories: Math.max(0, Math.round(Number(data.calories) || 0)),
+      protein: Math.max(0, Math.round(Number(data.protein) || 0)),
+      carbs: Math.max(0, Math.round(Number(data.carbs) || 0)),
+      fat: Math.max(0, Math.round(Number(data.fat) || 0)),
+      fiber: Math.max(0, Math.round(Number(data.fiber) || 0)),
+      sugar: Math.max(0, Math.round(Number(data.sugar) || 0)),
+      confidence: Math.min(100, Math.max(0, Math.round(Number(data.confidence) || 0))),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    demoState.history.push(result);
+    localStorage.setItem('mycal_history', JSON.stringify(demoState.history));
+    renderHistory();
+
+    scanResult.classList.remove('loading');
+    scanResult.innerHTML = resultHTML(result);
+    showToast('Análise concluída com sucesso.');
+  } catch (err) {
+    scanResult.classList.remove('loading');
+    const message = err && err.message === 'timeout'
+      ? 'A análise demorou demais. Tente novamente.'
+      : 'Não foi possível analisar a foto agora. Tente novamente.';
+    scanResult.innerHTML = `<div style="color:#DC2626;font-weight:600;">${message}</div>`;
+    showToast(message);
+  } finally {
+    isAnalyzing = false;
+    scanMealBtn.disabled = false;
+  }
+}
+
+/* Monta o HTML do resultado nutricional em grid */
+function resultHTML(r) {
+  const cards = [
+    { label: 'Calorias', value: `${r.calories}`, unit: 'kcal', color: '#22C55E' },
+    { label: 'Proteína', value: `${r.protein}`, unit: 'g', color: '#3B82F6' },
+    { label: 'Carboidratos', value: `${r.carbs}`, unit: 'g', color: '#F59E0B' },
+    { label: 'Gorduras', value: `${r.fat}`, unit: 'g', color: '#EF4444' },
+    { label: 'Fibras', value: `${r.fiber}`, unit: 'g', color: '#8B5CF6' },
+    { label: 'Açúcares', value: `${r.sugar}`, unit: 'g', color: '#EC4899' }
+  ];
+  const tiles = cards.map(c => `
+    <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 6px;text-align:center;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:${c.color};margin-bottom:2px;">${c.label}</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);">${c.value}<span style="font-size:10px;font-weight:600;color:var(--gray-soft);margin-left:2px;">${c.unit}</span></div>
+    </div>`).join('');
+
+  return `
+    <strong style="font-size:15px;">${escapeHtml(r.meal)}</strong>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;">${tiles}</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--gray-soft);">✓ Confiança da IA: ${r.confidence}% · ${r.time}</div>`;
+}
+
+function signIn() {
+  const email = signinEmail.value.trim();
+  const password = signinPassword.value.trim();
+
+  if (!email || !password) {
+    showToast('Informe e-mail e senha para entrar.');
+    return;
+  }
+
+  const savedUser = demoState.user;
+  if (!savedUser || savedUser.email !== email) {
+    showToast('Conta não encontrada. Crie uma conta primeiro.');
+    return;
+  }
+
+  saveUser(savedUser.name, savedUser.email);
+  closeModal();
+  showToast(`Bem-vindo de volta, ${savedUser.name}.`);
+}
+
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 8);
+});
+
+mobileToggle.addEventListener('click', () => {
+  mobileMenu.classList.toggle('open');
+});
+
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+});
+
+modalClose.addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', (event) => {
+  if (event.target === modalBackdrop) closeModal();
+});
+
+switchToSignin.addEventListener('click', () => { stopCamera(); openModal('signin'); });
+switchToSignup.addEventListener('click', () => openModal('signup'));
+window.addEventListener('pagehide', stopCamera);
+window.addEventListener('beforeunload', stopCamera);
+mealPhoto.addEventListener('change', updatePreview);
+
+const startButtons = document.querySelectorAll('[data-open-modal="signup"]');
+startButtons.forEach(button => {
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    openModal('signup');
+  });
+});
+
+const signinButtons = document.querySelectorAll('[data-open-modal="signin"]');
+signinButtons.forEach(button => {
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    openModal('signin');
+  });
+});
+
+scanMealBtn.addEventListener('click', analyzeMeal);
+openCameraBtn.addEventListener('click', openCamera);
+captureBtn.addEventListener('click', capturePhoto);
+cancelCameraBtn.addEventListener('click', stopCamera);
+
+document.getElementById('signinBtn').addEventListener('click', signIn);
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && modalBackdrop.classList.contains('show')) {
+    closeModal();
+  }
+});
+
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => io.observe(el));
+
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+if (demoState.user) {
+  navSignin.textContent = demoState.user.name;
+  userName.value = demoState.user.name;
+  userEmail.value = demoState.user.email;
+  signinEmail.value = demoState.user.email;
+}
+
+renderHistory();
+</script>
+
+</body>
+</html>
