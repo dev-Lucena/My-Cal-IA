@@ -9,15 +9,11 @@ MYCAL' é uma landing page de um app de nutrição com IA que estima calorias e 
 - Modal de cadastro/login com captura de foto (câmera ao vivo ou upload de imagem)
 - Análise nutricional real feita por IA (Puter.js), a partir da foto enviada
 - Histórico local salvo no navegador (localStorage)
-- Compressão inteligente da imagem antes do envio à IA (evita timeouts e rejeições em fotos grandes)
-- Parsing robusto da resposta da IA (suporta conteúdo multi-partes e texto explicativo)
-- Resultado nutricional exibido em um painel visual com calorias e macros
 
 ## 📁 Estrutura do projeto
 
 - `index.html` — página principal do site (HTML, CSS e JS em um único arquivo)
 - `assets/` — imagens e vídeos usados pela landing page (`hero-poster.jpg`, `hero-demo.mp4`)
-- `vercel.json` — configurações de hospedagem para a Vercel (cache e cabeçalhos)
 - `LICENSE` — licença MIT
 - `.gitignore` — arquivos ignorados pelo Git
 

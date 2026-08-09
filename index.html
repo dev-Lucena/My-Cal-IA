@@ -1247,52 +1247,11 @@ const cancelCameraBtn = document.getElementById('cancelCameraBtn');
 const captureCanvas = document.getElementById('captureCanvas');
 const scanMealBtn = document.getElementById('scanMealBtn');
 
-const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB (upload bruto)
-const MAX_SEND_BYTES = 2.5 * 1024 * 1024; // 2.5MB (limite de envio à IA)
-const MAX_IMAGE_DIM = 1280; // maior lado em px após compressão
-const JPEG_QUALITY = 0.82;
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB
+let currentPhotoFile = null;
 let currentPhotoDataUrl = null;
 let cameraStream = null;
 let isAnalyzing = false;
-
-/**
- * Comprime/redimensiona uma imagem (dataURL) para reduzir o payload
- * enviado ao Puter, evitando rejeição e timeouts. Faz bypass se já
- * estiver pequena o suficiente.
- */
-function compressImage(dataUrl, targetBytes = MAX_SEND_BYTES) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      let w = img.naturalWidth;
-      let h = img.naturalHeight;
-
-      // Redimensiona para caber no limite de dimensão
-      if (w > MAX_IMAGE_DIM || h > MAX_IMAGE_DIM) {
-        const scale = MAX_IMAGE_DIM / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
-      }
-
-const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-
-      // Tenta qualidades decrescentes até caber no limite de bytes
-      let quality = JPEG_QUALITY;
-      let out = canvas.toDataURL('image/jpeg', quality);
-      while (out.length > targetBytes * 1.37 && quality > 0.4) {
-        quality -= 0.12;
-        out = canvas.toDataURL('image/jpeg', quality);
-      }
-      resolve(out);
-    };
-    img.onerror = () => resolve(dataUrl); // mantém original se falhar
-    img.src = dataUrl;
-  });
-}
 
 let demoState = {
   user: safeParse(localStorage.getItem('mycal_user'), null),
@@ -1325,7 +1284,6 @@ function showToast(text) {
 }
 
 function openModal(mode = 'signup') {
-  clearAnalysisState();
   modalBackdrop.classList.add('show');
   modalBackdrop.setAttribute('aria-hidden', 'false');
   if (mode === 'signin') {
@@ -1413,9 +1371,16 @@ function capturePhoto() {
   captureCanvas.height = cameraVideo.videoHeight;
   const ctx = captureCanvas.getContext('2d');
   ctx.drawImage(cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+
   currentPhotoDataUrl = captureCanvas.toDataURL('image/jpeg', 0.9);
-  clearAnalysisState();
   setPreview(currentPhotoDataUrl);
+
+  captureCanvas.toBlob((blob) => {
+    if (blob) {
+      currentPhotoFile = new File([blob], 'foto-refeicao.jpg', { type: 'image/jpeg' });
+    }
+  }, 'image/jpeg', 0.9);
+
   stopCamera();
 }
 
@@ -1433,16 +1398,9 @@ function setPreview(dataUrl) {
   scanPreview.classList.add('show');
 }
 
-function clearAnalysisState() {
-  scanResult.classList.remove('show', 'loading');
-  scanResult.innerHTML = '';
-}
-
 function updatePreview() {
   const file = mealPhoto.files && mealPhoto.files[0];
   if (!file) return;
-
-  clearAnalysisState(); // remove resultado/análise antiga ao escolher nova foto
 
   if (!file.type.startsWith('image/')) {
     showToast('Envie um arquivo de imagem válido (JPG, PNG, WebP).');
@@ -1457,6 +1415,7 @@ function updatePreview() {
 
   const reader = new FileReader();
   reader.onload = () => {
+    currentPhotoFile = file;
     currentPhotoDataUrl = reader.result;
     setPreview(currentPhotoDataUrl);
   };
@@ -1472,48 +1431,10 @@ function withTimeout(promise, ms) {
   ]);
 }
 
-/*
- * Extrai o objeto JSON de uma resposta da IA. Lida com:
- *  - conteúdo multi-partes (arrays de {type, text})
- *  - texto explicativo ao redor do JSON
- *  - markdown ```json ```
- */
-function extractJson(raw) {
-  // Converte possível resposta estruturada/array em texto
-  let text = raw;
-  if (Array.isArray(raw)) {
-    text = raw.map(part => {
-      if (part && typeof part === 'object') return part.text || part.content || '';
-      return String(part);
-    }).join('\n');
-  } else if (raw && typeof raw === 'object') {
-    text = raw.message?.content || raw.text || raw.content || JSON.stringify(raw);
-  }
-  text = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
-
-  // Encontra o primeiro bloco { ... } balanceado
-  const start = text.indexOf('{');
-  if (start === -1) throw new SyntaxError('JSON não encontrado');
-  let depth = 0, inStr = false, escape = false;
-  for (let i = start; i < text.length; i++) {
-    const ch = text[i];
-    if (inStr) {
-      if (escape) escape = false;
-      else if (ch === '\\') escape = true;
-      else if (ch === '"') inStr = false;
-      continue;
-    }
-    if (ch === '"') inStr = true;
-    else if (ch === '{') depth++;
-    else if (ch === '}') {
-      depth--;
-      if (depth === 0) {
-        const jsonStr = text.slice(start, i + 1);
-        return JSON.parse(jsonStr);
-      }
-    }
-  }
-  throw new SyntaxError('JSON incompleto');
+function extractJson(text) {
+  const cleaned = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  return JSON.parse(match ? match[0] : cleaned);
 }
 
 async function analyzeMeal() {
@@ -1526,7 +1447,7 @@ async function analyzeMeal() {
     showToast('Preencha nome e e-mail para continuar.');
     return;
   }
-  if (!currentPhotoDataUrl) {
+  if (!currentPhotoFile) {
     showToast('Tire ou envie uma foto do prato para analisar.');
     return;
   }
@@ -1535,12 +1456,12 @@ async function analyzeMeal() {
     return;
   }
 
-saveUser(name, email);
+  saveUser(name, email);
 
   isAnalyzing = true;
   scanMealBtn.disabled = true;
   scanResult.classList.add('show', 'loading');
-  scanResult.innerHTML = '<span class="spinner"></span>Preparando a foto…';
+  scanResult.innerHTML = '<span class="spinner"></span>Analisando a foto do prato…';
 
   const prompt = 'Você é um nutricionista especialista em análise visual de alimentos. ' +
     'Observe a foto do prato e estime os valores nutricionais totais da refeição. ' +
@@ -1549,15 +1470,13 @@ saveUser(name, email);
     'Todos os valores numéricos devem ser números inteiros, sem unidades e sem texto.';
 
   try {
-    // Comprime a foto para reduzir payload e evitar timeout na IA
-    scanResult.innerHTML = '<span class="spinner"></span>Otimizando a imagem…';
-    const optimized = await compressImage(currentPhotoDataUrl);
-
-    scanResult.innerHTML = '<span class="spinner"></span>Analisando a foto do prato…';
-    const response = await withTimeout(puter.ai.chat(prompt, optimized), 30000);
+    const response = await withTimeout(
+      puter.ai.chat(prompt, currentPhotoFile, { model: 'gpt-4o' }),
+      30000
+    );
     const rawText = typeof response === 'string'
       ? response
-      : (response?.message?.content ?? response?.text ?? response);
+      : (response?.message?.content ?? response?.text ?? JSON.stringify(response));
 
     const data = extractJson(rawText);
 
@@ -1578,41 +1497,19 @@ saveUser(name, email);
     renderHistory();
 
     scanResult.classList.remove('loading');
-    scanResult.innerHTML = resultHTML(result);
+    scanResult.innerHTML = `<strong>${escapeHtml(result.meal)}</strong><div>${result.calories} kcal · ${result.protein}g proteína · ${result.carbs}g carb · ${result.fat}g gordura</div><div style="margin-top:4px;font-size:12px;color:var(--gray-soft);">Confiança da IA: ${result.confidence}%</div>`;
     showToast('Análise concluída com sucesso.');
   } catch (err) {
-    scanResult.classList.remove('loading');
+    scanResult.classList.remove('loading', 'show');
+    scanResult.innerHTML = '';
     const message = err && err.message === 'timeout'
       ? 'A análise demorou demais. Tente novamente.'
       : 'Não foi possível analisar a foto agora. Tente novamente.';
-    scanResult.innerHTML = `<div style="color:#DC2626;font-weight:600;">${message}</div>`;
     showToast(message);
   } finally {
     isAnalyzing = false;
     scanMealBtn.disabled = false;
   }
-}
-
-/* Monta o HTML do resultado nutricional em grid */
-function resultHTML(r) {
-  const cards = [
-    { label: 'Calorias', value: `${r.calories}`, unit: 'kcal', color: '#22C55E' },
-    { label: 'Proteína', value: `${r.protein}`, unit: 'g', color: '#3B82F6' },
-    { label: 'Carboidratos', value: `${r.carbs}`, unit: 'g', color: '#F59E0B' },
-    { label: 'Gorduras', value: `${r.fat}`, unit: 'g', color: '#EF4444' },
-    { label: 'Fibras', value: `${r.fiber}`, unit: 'g', color: '#8B5CF6' },
-    { label: 'Açúcares', value: `${r.sugar}`, unit: 'g', color: '#EC4899' }
-  ];
-  const tiles = cards.map(c => `
-    <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 6px;text-align:center;">
-      <div style="font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:${c.color};margin-bottom:2px;">${c.label}</div>
-      <div style="font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);">${c.value}<span style="font-size:10px;font-weight:600;color:var(--gray-soft);margin-left:2px;">${c.unit}</span></div>
-    </div>`).join('');
-
-  return `
-    <strong style="font-size:15px;">${escapeHtml(r.meal)}</strong>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;">${tiles}</div>
-    <div style="margin-top:8px;font-size:11px;color:var(--gray-soft);">✓ Confiança da IA: ${r.confidence}% · ${r.time}</div>`;
 }
 
 function signIn() {
